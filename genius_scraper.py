@@ -24,8 +24,11 @@ def request_song_url(artist_name, song_cap):
         response = request_artist_info(artist_name, page)
         json = response.json()        # Collect up to song_cap song objects from artist
         song_info = []
-        print(json['response']['hits'][0].keys())
-        print(json['response']['hits'][0]['result'])
+        if not json['response']['hits']:
+            raise Exception('Artist URL not found')
+        #print(json['response']['hits'][0]['result'].keys())
+        #print(" --- --- --- ")
+        #print(json['response']['hits'][0]['result']['primary_artist']['name'])
         for hit in json['response']['hits']: # sorted after hits
             if artist_name.lower() in hit['result']['primary_artist']['name'].lower():
                 song_info.append(hit)
@@ -67,29 +70,57 @@ def write_lyrics_to_file(artist_name, song_count):
 
 if __name__ == "__main__":
     #write_lyrics_to_file('Queens of the Stone Age', 2)
-    artist_name = 'queens of the stone age'
-    song_count = 1
+    #artist_name = 'queens of the stone age'
+    #song_count = 1
 
-    urls = request_song_url(artist_name, song_count)
-    for url in urls:
-        lyrics = scrape_song_lyrics(url)
+    #urls = request_song_url(artist_name, song_count)
+    #for url in urls:
+    #    lyrics = scrape_song_lyrics(url)
         #print(lyrics)
 
     #create dictionary 
-    '''
+    
     artist_albums = {'electronic': [], 'experimental' : [],
                      'folk-country' : [], 'global' : [],
                      'jazz' : [], 'metal' : [], 'pop-rnb' : [],
                      'rap' : [], 'rock' : []}
     
-    for genre in artist_albums.keys():
-        f = open("artist_album/"+genre+".txt", "r")
-        temp = []
-        for artist_album in f.read().split(";"):
-            ar_al = artist_album.split('_')
-            if len(ar_al) == 2:
-                temp.append((ar_al[0], ar_al[1]))
-        artist_albums[genre] = temp
-
-    print(artist_albums)
-    '''
+    # the genre to scrape
+    genre = 'folk-country'
+    print("-- Scraping genre: " +  genre + " --")
+    
+    #for genre in artist_albums.keys():
+    f = open("artist_album/"+genre+".txt", "r")
+    temp = []
+    for artist_album in f.read().split(";"):
+        ar_al = artist_album.split('_')
+        if len(ar_al) == 2:
+            temp.append((ar_al[0], ar_al[1]))
+    artist_albums[genre] = temp
+    
+    song_count = 10
+    #for genre, _ in artist_albums.items():
+    processed = []
+    for ar_al in artist_albums[genre]:
+        if ar_al[0] not in processed:
+            print("processing " + ar_al[0])
+            f = open("lyrics/"+genre+".txt", "a+")
+            urls = ""
+            try:
+                urls = request_song_url(ar_al[0], song_count)
+            except Exception as e:
+                print("Failed: " + str(e))
+                #print(urls)
+            for url in urls:
+                try:
+                    lyrics = scrape_song_lyrics(url)
+                    f.write(str(ar_al[0]) + '\n')
+                    f.write(lyrics)
+                    f.write('\n;\n')
+                except Exception as e:
+                    print("Failed: " + str(e))
+            f.close()
+            processed.append(ar_al[0])
+        else:
+            print(ar_al[0] + " has already been processed")
+    print("-- Finished scraping genre: " + genre +" --")
