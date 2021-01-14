@@ -69,15 +69,6 @@ def write_lyrics_to_file(artist_name, song_count):
     print('Wrote {} lines to file from {} songs'.format(num_lines, song_count))
 
 if __name__ == "__main__":
-    #write_lyrics_to_file('Queens of the Stone Age', 2)
-    #artist_name = 'queens of the stone age'
-    #song_count = 1
-
-    #urls = request_song_url(artist_name, song_count)
-    #for url in urls:
-    #    lyrics = scrape_song_lyrics(url)
-        #print(lyrics)
-
     #create dictionary 
     
     artist_albums = {'electronic': [], 'experimental' : [],
@@ -86,7 +77,7 @@ if __name__ == "__main__":
                      'rap' : [], 'rock' : []}
     
     # the genre to scrape
-    genre = 'folk-country'
+    genre = 'rock'
     print("-- Scraping genre: " +  genre + " --")
     
     #for genre in artist_albums.keys():
@@ -98,7 +89,7 @@ if __name__ == "__main__":
             temp.append((ar_al[0], ar_al[1]))
     artist_albums[genre] = temp
     
-    song_count = 10
+    song_count = 5
     #for genre, _ in artist_albums.items():
     processed = []
     for ar_al in artist_albums[genre]:
@@ -114,7 +105,7 @@ if __name__ == "__main__":
             for url in urls:
                 try:
                     lyrics = scrape_song_lyrics(url)
-                    f.write(str(ar_al[0]) + '\n')
+                    #f.write(str(ar_al[0]) + '\n') # write artist at top
                     f.write(lyrics)
                     f.write('\n;\n')
                 except Exception as e:
